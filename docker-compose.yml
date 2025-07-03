@@ -1,0 +1,84 @@
+version: '3.8'
+
+# --------------------------------------------
+# Twenty CRM — Self-Host with Coolify
+# --------------------------------------------
+# This Compose file is tested for deploying
+# Twenty CRM on a VPS using Coolify & Traefik
+# for wildcard SSL.
+#
+# Credits: Original Compose idea by @calebro_xyz
+# --------------------------------------------
+
+services:
+  server:
+    image: twentycrm/twenty:latest
+    ports:
+      - "3000:3000" # Maps container port to host port
+    volumes:
+      - server-local-data:/app/packages/twenty-server/.local-storage
+    environment:
+      NODE_PORT: 3000
+      # Database connection string (Postgres)
+      PG_DATABASE_URL: postgres://postgres:postgres@db:5432/default
+      # The public URL for your Twenty CRM app
+      SERVER_URL: https://crm.yourdomain.com
+      # Redis connection URL
+      REDIS_URL: redis://redis:6379
+      # Storage type (use 's3' if using external storage)
+      STORAGE_TYPE: local
+      # Important: Use a strong secret for JWTs
+      APP_SECRET: your_super_secret_key_here
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/healthz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: always
+
+  worker:
+    image: twentycrm/twenty:latest
+    command: ["yarn", "worker:prod"] # Starts the background worker
+    volumes:
+      - server-local-data:/app/packages/twenty-server/.local-storage
+    environment:
+      PG_DATABASE_URL: postgres://postgres:postgres@db:5432/default
+      SERVER_URL: https://crm.yourdomain.com
+      REDIS_URL: redis://redis:6379
+      DISABLE_DB_MIGRATIONS: "true" # Migrations run only on server
+      STORAGE_TYPE: local
+      APP_SECRET: your_super_secret_key_here
+    depends_on:
+      db:
+        condition: service_healthy
+      server:
+        condition: service_healthy
+    restart: always
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -h localhost -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: always
+
+  redis:
+    image: redis
+    restart: always
+
+# --------------------------------------------
+# Named Docker volumes for data persistence
+# --------------------------------------------
+volumes:
+  db-data:   # Stores Postgres data files
+  server-local-data: # Stores server local storage files (uploads, etc.)
