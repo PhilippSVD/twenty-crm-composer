@@ -22,7 +22,7 @@ services:
       # Database connection string (Postgres)
       PG_DATABASE_URL: postgres://postgres:postgres@db:5432/default
       # The public URL for your Twenty CRM app
-      SERVER_URL: https://crm.yourdomain.com
+      SERVER_URL: https://twenty-crm.vonderschau.com
       # Redis connection URL
       REDIS_URL: redis://redis:6379
       # Storage type (use 's3' if using external storage)
