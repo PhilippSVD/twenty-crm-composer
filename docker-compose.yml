@@ -28,7 +28,7 @@ services:
       # Storage type (use 's3' if using external storage)
       STORAGE_TYPE: local
       # Important: Use a strong secret for JWTs
-      APP_SECRET: your_super_secret_key_here
+      APP_SECRET: Lxw+q1wk/kxs1UOu40b1RXNb/+zjYDKirfFeEDbJ7Mk=
     depends_on:
       db:
         condition: service_healthy
@@ -46,11 +46,11 @@ services:
       - server-local-data:/app/packages/twenty-server/.local-storage
     environment:
       PG_DATABASE_URL: postgres://postgres:postgres@db:5432/default
-      SERVER_URL: https://crm.yourdomain.com
+      SERVER_URL: https://twenty-crm.vonderschau.com
       REDIS_URL: redis://redis:6379
       DISABLE_DB_MIGRATIONS: "true" # Migrations run only on server
       STORAGE_TYPE: local
-      APP_SECRET: your_super_secret_key_here
+      APP_SECRET: Lxw+q1wk/kxs1UOu40b1RXNb/+zjYDKirfFeEDbJ7Mk=
     depends_on:
       db:
         condition: service_healthy
